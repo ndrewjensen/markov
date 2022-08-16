@@ -1,3 +1,5 @@
+"use strict";
+
 /** Textual markov chain generator. */
 
 
@@ -27,7 +29,21 @@ class MarkovMachine {
    * */
 
   getChains() {
-    // TODO: implement this!
+    // TODO: optimize
+    let wordsMap = new Map();
+
+    this.words.map(word => wordsMap.set(word,[]));
+    for (let i = 0; i < this.words.length - 1; i++) {
+      if (wordsMap.has(this.words[i])) {
+        let wordArr = wordsMap.get(this.words[i]);
+        wordArr.push(this.words[i+1]);
+        wordsMap.set(this.words[i],wordArr);
+      }
+    }
+    let wordArr = wordsMap.get(this.words.at(-1));
+        wordArr.push(null);
+        wordsMap.set(this.words.at(-1),wordArr);
+    return wordsMap;
   }
 
 
@@ -35,10 +51,21 @@ class MarkovMachine {
    *  until it hits a null choice. */
 
   getText() {
-    // TODO: implement this!
 
-    // - start at the first word in the input text
-    // - find a random word from the following-words of that
-    // - repeat until reaching the terminal null
+    let currentWord = this.words[0];
+    let phrase = [currentWord];
+    while (currentWord != null) {
+      let choices = this.chains.get(currentWord);
+      let nextWord = choices[Math.floor(Math.random()*choices.length)];
+      phrase.push(nextWord);
+      currentWord = nextWord;
+    }
+    phrase.pop();
+    return phrase.join(' ')
   }
 }
+
+const test = new MarkovMachine('This is our test phrase. This was our phrasiest phrase. And this sentence.');
+
+console.log(test.getChains());
+console.log(test.getText());
